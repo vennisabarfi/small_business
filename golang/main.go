@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"small_business/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -15,6 +16,9 @@ func main() {
 		log.Fatal("Error loading .env file.", err)
 	}
 	fmt.Println(".env file loaded successfully!")
+
+	//connect to db
+	models.ConnectToDB()
 
 	r := gin.Default()
 
