@@ -21,7 +21,7 @@ func ConnectToDB() {
 	defer dbpool.Close()
 
 	var greeting string
-	err = dbpool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
+	err = dbpool.QueryRow(context.Background(), "select 'This is a test query'").Scan(&greeting)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 		os.Exit(1)
