@@ -12,12 +12,12 @@ This project is a comprehensive Inventory Management System built with Go for th
 ## Progress Tracker
 
 ### Day 1-2: Project Setup
-- [ ] Set up a new Go project and initialize a Git repository.
-- [ ] Configure PostgreSQL database and set up environment variables.
-- [ ] Set up a basic project structure with folders for `controllers`, `models`, `routes`, and `utils`.
-- [ ] Set up Docker and Docker Compose for the development environment.
-- [ ] Create a basic `main.go` file to start the server.
-- [ ] Configure initial routes and a simple health check endpoint.
+- [Done] Set up a new Go project and initialize a Git repository.
+- [Done] Configure PostgreSQL database and set up environment variables.
+- [Done] Set up a basic project structure with folders for `controllers`, `models`, `routes`, and `utils`.
+- [Pending] Set up Docker and Docker Compose for the development environment.
+- [Done] Create a basic `main.go` file to start the server.
+- [Doing...] Configure initial routes and a simple health check endpoint.
 
 ### Day 3-4: User Authentication and Authorization
 - [ ] Implement user registration endpoint (`/api/register`).
@@ -67,8 +67,8 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [ ] Add examples and usage instructions in the README.
 
 ### Day 14: Testing and Quality Assurance
-- [ ] Write unit and integration tests to ensure code quality.
-- [ ] Achieve at least 90% test coverage.
+- [Doing...] Write unit and integration tests to ensure code quality.
+- [Hopeful] Achieve at least 90% test coverage.
 - [ ] Perform load testing to ensure scalability and performance.
 
 ### Day 15: Deployment and CI/CD
