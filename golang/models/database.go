@@ -3,10 +3,15 @@ package models
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var dbpool *pgx.ConnPool
 
 // using a connection pool
 func ConnectToDB() {
@@ -28,4 +33,23 @@ func ConnectToDB() {
 	}
 
 	fmt.Println(greeting)
+}
+
+// look into this and test
+func CreateHttpMiddleware(c *gin.Context) {
+	tx, err := dbpool.Begin() //(c.Request.Context)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	fmt.Println("Database Connection initiated with HTTP Request!")
+	defer tx.Rollback()
+
+	c.Set("db", tx)
+	c.Next()
+
+	if c.Writer.Status() >= http.StatusInternalServerError {
+		tx.Rollback()
+		return
+	}
 }

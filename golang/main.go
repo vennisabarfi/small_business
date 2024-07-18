@@ -22,10 +22,15 @@ func main() {
 
 	r := gin.Default()
 
+	// Middleware to pass database connection to context
+	r.Use(models.CreateHttpMiddleware)
+
 	//home page
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "Welcome to the business API")
 	})
+
+	r.POST("/register", models.CreateUser)
 
 	r.Run() //running on port in env due to fresh
 }
