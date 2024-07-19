@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"small_business/controllers"
 	"small_business/models"
 
 	"github.com/gin-gonic/gin"
@@ -17,20 +18,25 @@ func main() {
 	}
 	fmt.Println(".env file loaded successfully!")
 
-	//connect to db
-	models.ConnectToDB()
-
 	r := gin.Default()
 
-	// Middleware to pass database connection to context
-	r.Use(models.CreateHttpMiddleware)
+	// connect to db
+	models.ConnectToDB()
+
+	// r.Use(func(c *gin.Context) {
+	// 	c.Set("db", db)
+	// 	c.Next()
+	// })
+
+	// Middleware to pass database connection to context -- work on this
+	// r.Use(models.CreateHttpMiddleware)
 
 	//home page
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "Welcome to the business API")
 	})
 
-	r.POST("/register", models.CreateUser)
+	r.POST("/register", controllers.CreateUser)
 
 	r.Run() //running on port in env due to fresh
 }
