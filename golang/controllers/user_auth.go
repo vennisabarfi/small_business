@@ -2,21 +2,27 @@ package controllers
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v4/pgxpool"
+	_ "github.com/lib/pq" //avoid import postgres error with sql
 	"golang.org/x/crypto/bcrypt"
 )
 
 //create user struct
 
 type User struct {
-	ID       int    `json:"id"`
+	ID       int64  `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+var pool *sql.DB // Database connection pool.
 
 //handler for creating user
 
@@ -45,36 +51,41 @@ func CreateUser(c *gin.Context) {
 	// Log the received user data
 	log.Printf("Received user data: %+v", user)
 
-	// Retrieve the database connection from Gin's context
-	dbpool, exists := c.Get("db")
-	if !exists {
-		log.Fatal("No database connection in Gin context")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Database connection is not initialized",
-		})
-		return
-	}
-
-	// Type assertion to convert db to the correct type
-	conn, ok := dbpool.(*pgxpool.Pool)
-	if !ok {
-		log.Fatal("Invalid database connection")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Invalid database connection",
-		})
-		return
-	}
-
-	// Execute the SQL query to insert the user and retrieve the ID
-	err = conn.QueryRow(context.Background(), "INSERT INTO small_business (email, password) VALUES ($1, $2) RETURNING id", user.Email, user.Password).Scan(&user.ID)
+	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Printf("Failed to insert user: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to insert user",
-		})
-		return
+		panic(err)
 	}
+
+	defer pool.Close()
+
+	pool.SetConnMaxLifetime(0)
+	pool.SetMaxIdleConns(3)
+	pool.SetMaxOpenConns(3)
+
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
+	appSignal := make(chan os.Signal, 3)
+	signal.Notify(appSignal, os.Interrupt)
+
+	go func() {
+		<-appSignal
+		stop()
+	}()
+
+	_, err = pool.ExecContext(ctx, "INSERT INTO users (email, password) VALUES ($1, $2)", user.Email, user.Password)
+
+	if err != nil {
+		log.Fatal("Failed to insert user", err)
+	}
+	fmt.Println("Inserting user into database")
 
 	// Respond with the user ID
-	c.JSON(http.StatusOK, gin.H{"userID": user.ID})
+	c.JSON(http.StatusOK, gin.H{
+		"userID": user.ID,
+	})
+}
+
+func CreateUserQuery() {
+
 }

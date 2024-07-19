@@ -2,64 +2,73 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx"
-	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/lib/pq"
+	//avoid import error with generic database/sql
 )
 
-var dbpool *pgx.ConnPool
+var pool *sql.DB
 
-// using a connection pool
-func ConnectToDB() {
-	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+// verify that database credentials are valid
+func PingDatabase(ctx context.Context) {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	err := pool.PingContext(ctx)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
-		os.Exit(1)
-	} else {
-		fmt.Println("Successfully created connection pool to database!")
-	}
-	defer dbpool.Close()
-
-	// Ensure database is connected by pinging
-	connection, err := dbpool.Acquire(context.Background())
-	if err != nil {
-		log.Fatal("Unable to acquire connection to the database %v", err)
-		os.Exit(1)
-	}
-	fmt.Println("Connection to database established!")
-
-	defer connection.Release()
-
-	var greeting string
-	err = dbpool.QueryRow(context.Background(), "select 'This is a test query'").Scan(&greeting)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Unable to connect to database %v", err)
 	}
 
-	fmt.Println(greeting)
 }
 
-// look into this and test(causing errors. Fix this or implement differently)
-func CreateHttpMiddleware(c *gin.Context) {
-	tx, err := dbpool.Begin() //(c.Request.Context)
+func ConnectToDB() {
+	var err error
+	pool, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
+		log.Fatal("Unable to retrieve database credentials.")
 	}
-	fmt.Println("Database Connection initiated with HTTP Request!")
-	defer tx.Rollback()
+	fmt.Println("Retrieving Database Credentials...")
+	defer pool.Close()
 
-	c.Set("db", tx)
-	c.Next()
+	pool.SetConnMaxLifetime(0) //how many times a connection can be used
+	pool.SetMaxIdleConns(3)    //max number of connections in idle pool
+	pool.SetMaxOpenConns(3)    // max number of open connections in a database
 
-	if c.Writer.Status() >= http.StatusInternalServerError {
-		tx.Rollback()
-		return
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
+	appSignal := make(chan os.Signal, 3)
+	signal.Notify(appSignal, os.Interrupt)
+
+	go func() {
+		<-appSignal
+		stop()
+	}()
+
+	//ping database
+
+	PingDatabase(ctx)
+	fmt.Println("Connecting to Database...")
+	fmt.Println("Connected to Database!")
+
+}
+
+// If the query fails exit the program with an error.
+func Query(ctx context.Context, id int64) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	var name string
+	err := pool.QueryRowContext(ctx, "select p.name from people as p where p.id = :id;", sql.Named("id", id)).Scan(&name)
+	if err != nil {
+		log.Fatal("unable to execute search query", err)
 	}
+	log.Println("name=", name)
 }
