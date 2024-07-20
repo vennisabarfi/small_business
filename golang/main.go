@@ -25,6 +25,7 @@ func main() {
 	})
 
 	r.POST("/register", controllers.CreateUser)
+	r.POST("/login", controllers.LoginUser)
 
 	r.Run() //running on port in env due to fresh
 }

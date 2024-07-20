@@ -15,17 +15,17 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [Done] Set up a new Go project and initialize a Git repository.
 - [Done] Configure PostgreSQL database and set up environment variables.
 - [Done] Set up a basic project structure with folders for `controllers`, `models`, `routes`, and `utils`.
-- [Pending] Set up Docker and Docker Compose for the development environment.
+- [Doing...] Set up Docker and Docker Compose for the development environment.
 - [Done] Create a basic `main.go` file to start the server.
-- [Doing...] Configure initial routes and a simple health check endpoint.
+- [Done] Configure initial routes and a simple health check endpoint.
 
 ### Day 3-4: User Authentication and Authorization
-- [ ] Implement user registration endpoint (`/api/register`).
-- [ ] Implement user login endpoint (`/api/login`).
-- [ ] Add JWT token generation for authentication.
-- [ ] Implement middleware for JWT validation.
-- [ ] Create a `User` model and migration.
-- [ ] Write tests for user authentication endpoints.
+- [Done] Implement user registration endpoint (`/api/register`).
+- [Doing...] Implement user login endpoint (`/api/login`).
+- [Done] Add JWT token generation for authentication.
+- [Doing...] Implement middleware for JWT validation.
+- [Done] Create a `User` model and migration.
+- [Doing...] Write tests for user authentication endpoints.
 
 ### Day 5-6: Product Management
 - [ ] Implement endpoints for creating (`/api/products`), retrieving (`/api/products`), updating (`/api/products/{id}`), and deleting products (`/api/products/{id}`).
@@ -67,8 +67,8 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [ ] Add examples and usage instructions in the README.
 
 ### Day 14: Testing and Quality Assurance
-- [Doing...] Write unit and integration tests to ensure code quality.
-- [Hopeful] Achieve at least 90% test coverage.
+- [ ] Write unit and integration tests to ensure code quality.
+- [ ] Achieve at least 90% test coverage.
 - [ ] Perform load testing to ensure scalability and performance.
 
 ### Day 15: Deployment and CI/CD

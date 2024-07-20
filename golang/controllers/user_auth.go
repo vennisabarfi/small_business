@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" //avoid import postgres error with sql
@@ -33,9 +32,11 @@ func CreateUser(c *gin.Context) {
 		Password string `json:"password" binding:"required,min=8"`
 	}
 
+	// if error with fields
+
 	if err := c.BindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request",
+			"Error Binding JSON Data": err,
 		})
 		return
 	}
@@ -58,34 +59,84 @@ func CreateUser(c *gin.Context) {
 
 	defer pool.Close()
 
-	pool.SetConnMaxLifetime(0)
-	pool.SetMaxIdleConns(3)
-	pool.SetMaxOpenConns(3)
-
-	ctx, stop := context.WithCancel(context.Background())
-	defer stop()
-
-	appSignal := make(chan os.Signal, 3)
-	signal.Notify(appSignal, os.Interrupt)
-
-	go func() {
-		<-appSignal
-		stop()
-	}()
+	ctx := context.Background()
 
 	_, err = pool.ExecContext(ctx, "INSERT INTO users (email, password) VALUES ($1, $2)", user.Email, user.Password)
 
 	if err != nil {
-		log.Fatal("Failed to insert user", err)
-	}
-	fmt.Println("Inserting user into database")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{
+			"Error creating new user": err,
+		})
+		return
 
-	// Respond with the user ID
-	c.JSON(http.StatusOK, gin.H{
-		"userID": user.ID,
-	})
+	} else {
+		fmt.Println("Inserting user into database")
+
+		// Respond with the user ID
+		c.String(http.StatusOK, "User successfully Added")
+	}
+
 }
 
-func CreateUserQuery() {
+func LoginUser(c *gin.Context) {
+	// Parse email and password from body
+	var body struct {
+		Email    string `json:"email" binding:"required,email"`
+		Password string `json:"password" binding:"required,min=8"`
+	}
 
+	//user data validation
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid email or password",
+		})
+		return
+	}
+
+	// Open database connection
+	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to connect to database",
+		})
+		return
+	}
+	defer pool.Close()
+
+	ctx := context.Background()
+
+	// Get user from database
+	var storedEmail, storedHashedPassword string
+	row := pool.QueryRowContext(ctx, "SELECT email, password FROM users WHERE email=$1", body.Email)
+	err = row.Scan(&storedEmail, &storedHashedPassword)
+
+	// if email and password not found
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid email or password",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to retrieve user data",
+		})
+		return
+	}
+
+	// Compare passwords
+	err = bcrypt.CompareHashAndPassword([]byte(storedHashedPassword), []byte(body.Password))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Invalid email or password",
+		})
+		return
+	}
+
+	// Successfully authenticated
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful",
+		"email":   storedEmail,
+	})
 }
