@@ -25,11 +25,11 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [Done] Add JWT token generation for authentication.
 - [Doing...] Implement middleware for JWT validation.
 - [Done] Create a `User` model and migration.
-- [Doing...] Write tests for user authentication endpoints.
+- [Done] Write tests for user authentication endpoints.
 
 ### Day 5-6: Product Management
-- [ ] Implement endpoints for creating (`/api/products`), retrieving (`/api/products`), updating (`/api/products/{id}`), and deleting products (`/api/products/{id}`).
-- [ ] Create `Product` model and migration.
+- [Doing...] Implement endpoints for creating (`/api/products`), retrieving (`/api/products`), updating (`/api/products/{id}`), and deleting products (`/api/products/{id}`).
+- [Doing...] Create `Product` model and migration.
 - [ ] Add validations for product fields.
 - [ ] Write tests for product management endpoints.
 - [ ] Implement search, sorting, and filtering features for products.
