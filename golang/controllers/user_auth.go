@@ -115,7 +115,7 @@ func LoginUser(c *gin.Context) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Invalid email or password",
+				"message": "Email and/or password is incorrect",
 			})
 			return
 		}

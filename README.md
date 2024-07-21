@@ -21,7 +21,7 @@ This project is a comprehensive Inventory Management System built with Go for th
 
 ### Day 3-4: User Authentication and Authorization
 - [Done] Implement user registration endpoint (`/api/register`).
-- [Doing...] Implement user login endpoint (`/api/login`).
+- [Doing] Implement user login endpoint (`/api/login`).
 - [Done] Add JWT token generation for authentication.
 - [Doing...] Implement middleware for JWT validation.
 - [Done] Create a `User` model and migration.
