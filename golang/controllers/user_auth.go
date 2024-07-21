@@ -21,7 +21,7 @@ type User struct {
 	Password string `json:"password"`
 }
 
-var pool *sql.DB // Database connection pool.
+// var pool *sql.DB // Database connection pool.
 
 //handler for creating user
 
