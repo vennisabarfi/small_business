@@ -28,7 +28,7 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [Done] Write tests for user authentication endpoints.
 
 ### Day 5-6: Product Management
-- [Doing...] Implement endpoints for creating (`/api/products`), retrieving (`/api/products`), updating (`/api/products/{id}`), and deleting products (`/api/products/{id}`).
+- [Doing...] Implement endpoints for creating (`/api/products/create`), retrieving (`/api/viewproducts`), updating (`/api/products/update/{id}`), and deleting products (`/api/products/delete/{id}`).
 - [Doing...] Create `Product` model and migration.
 - [ ] Add validations for product fields.
 - [ ] Write tests for product management endpoints.

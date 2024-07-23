@@ -28,7 +28,9 @@ func main() {
 	r.POST("/login", controllers.LoginUser)
 
 	//product handlers
-	r.GET("products/:id", controllers.ViewProductsById)
+	r.GET("/products/:id", controllers.ViewProductsById)
+	r.GET("/products", controllers.ViewProducts)
+	r.POST("/products/insert", controllers.InsertProducts) //rework /insert
 
 	r.Run() //running on port in env due to fresh
 }
