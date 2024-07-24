@@ -1,4 +1,0 @@
-# small_business/controllers
-controllers\suppliers.go:12:5: pool redeclared in this block
-	controllers\products.go:17:5: other declaration of pool
-controllers\suppliers.go:25:2: ctx declared and not used

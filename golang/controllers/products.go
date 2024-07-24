@@ -14,7 +14,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var pool *sql.DB // Database connection pool
+// var pool *sql.DB // Database connection pool
 
 type Product struct {
 	ID          int64           `json:"id"`
@@ -145,7 +145,7 @@ func InsertProducts(c *gin.Context) {
 	} else {
 		fmt.Println("Inserting product into database")
 
-		// Respond with the user ID
+		// Respond with product information
 		c.IndentedJSON(http.StatusOK, gin.H{
 			"message":             "Product Successfully Added",
 			"Product Information": product,
@@ -154,3 +154,77 @@ func InsertProducts(c *gin.Context) {
 	}
 
 }
+
+// func InsertProducts(c *gin.Context) {
+// 	// Open database connection
+// 	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+// 	if err != nil {
+// 		log.Fatal("Error opening database connection:", err)
+// 	}
+// 	defer pool.Close()
+
+// 	// Set a timeout for the context
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	var product Product
+
+// 	// Bind JSON input to product struct
+// 	if err := c.BindJSON(&product); err != nil {
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{
+// 			"error": "Invalid input",
+// 		})
+// 		return
+// 	}
+
+// 	tx, err := pool.BeginTx(ctx, nil)
+// 	if err != nil {
+// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
+// 			"error": "Failed to begin transaction",
+// 		})
+// 		return
+// 	}
+
+// 	query := "INSERT INTO products (name, description, price, stock) VALUES($1, $2, $3, $4) RETURNING id"
+// 	var productID int
+// 	err = tx.QueryRowContext(ctx, query, product.Name, product.Description, product.Price, product.Stock).Scan(&productID)
+// 	if err != nil {
+// 		tx.Rollback()
+// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
+// 			"error": "Failed to insert product",
+// 			"detail": err.Error(),
+// 		})
+// 		return
+// 	}
+
+// 	product.ID = productID
+
+// 	for _, supplierID := range product.SupplierIDs {
+// 		query := "INSERT INTO product_suppliers (product_id, supplier_id) VALUES($1, $2)"
+// 		_, err := tx.ExecContext(ctx, query, productID, supplierID)
+// 		if err != nil {
+// 			tx.Rollback()
+// 			c.IndentedJSON(http.StatusInternalServerError, gin.H{
+// 				"error": "Failed to insert product-supplier relationship",
+// 				"detail": err.Error(),
+// 			})
+// 			return
+// 		}
+// 	}
+
+// 	err = tx.Commit()
+// 	if err != nil {
+// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
+// 			"error": "Failed to commit transaction",
+// 		})
+// 		return
+// 	}
+
+// 	fmt.Println("Inserting product into database")
+
+// 	// Respond with the product information
+// 	c.IndentedJSON(http.StatusOK, gin.H{
+// 		"message":             "Product Successfully Added",
+// 		"Product Information": product,
+// 	})
+// }
