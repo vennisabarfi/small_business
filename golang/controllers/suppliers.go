@@ -18,6 +18,8 @@ type Supplier struct {
 	Name         string `json:"name"`
 	ContactEmail string `json:"contact_email"`
 	Phone        string `json:"phone"`
+	CreatedAt    string `json: created_at`
+	DeletedAt    string `json: deleted_at`
 }
 
 var pool *sql.DB
@@ -84,5 +86,38 @@ func ViewSuppliers(c *gin.Context) {
 	defer pool.Close()
 
 	// ctx := context.Background()
+
+	// var supplier Supplier
+
+	query := "SELECT * FROM supplier"
+
+	rows, err := pool.Query(query) //uses ctx internally
+	if err != nil {
+		print(err)
+	}
+	defer rows.Close()
+
+	var suppliers []Supplier
+
+	// Loop through rows and map onto databases
+	for rows.Next() {
+		var supplier Supplier
+		if err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.ContactEmail, &supplier.Phone, &supplier.CreatedAt, &supplier.DeletedAt); err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{
+				"Error retrieving suppliers": err,
+			})
+			log.Print("Error inserting new supplier", err)
+			return
+		}
+		suppliers = append(suppliers, supplier)
+	}
+	if err == sql.ErrNoRows {
+		c.IndentedJSON(http.StatusNotFound, gin.H{
+			"message": "No suppliers found",
+		})
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"Suppliers Found": suppliers,
+	})
 
 }
