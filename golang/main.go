@@ -36,6 +36,9 @@ func main() {
 	r.GET("/suppliers", controllers.ViewSuppliers)
 	r.GET("/suppliers/:id", controllers.ViewSuppliersById)
 	r.POST("/suppliers/insert", controllers.InsertSupplier)
+	r.PUT("/suppliers/change-email", controllers.UpdateSupplierEmail)
+	r.PUT("/suppliers/change-phone", controllers.UpdateSupplierPhone)
+	r.DELETE("/suppliers/remove/:id", controllers.DeleteSupplierByID)
 
 	r.Run() //running on port in env due to fresh
 }

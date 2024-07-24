@@ -19,8 +19,8 @@ type Supplier struct {
 	Name         string `json:"name"`
 	ContactEmail string `json:"contact_email"`
 	Phone        string `json:"phone"`
-	CreatedAt    string `json: created_at`
-	DeletedAt    string `json: deleted_at`
+	Createdat    string `json: created_at`
+	Deletedat    string `json: deleted_at`
 }
 
 var pool *sql.DB
@@ -103,7 +103,7 @@ func ViewSuppliers(c *gin.Context) {
 	// Loop through rows and map onto databases
 	for rows.Next() {
 		var supplier Supplier
-		if err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.ContactEmail, &supplier.Phone, &supplier.CreatedAt, &supplier.DeletedAt); err != nil {
+		if err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.ContactEmail, &supplier.Phone, &supplier.Createdat, &supplier.Deletedat); err != nil {
 			c.IndentedJSON(http.StatusBadRequest, gin.H{
 				"Error retrieving suppliers": err,
 			})
@@ -167,7 +167,153 @@ func ViewSuppliersById(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{
-		"Product Found": supplier,
+		"Supplier Found": supplier,
 	})
+
+}
+
+func DeleteSupplierByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid supplier ID",
+		})
+		return
+	}
+
+	//open database connection
+	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("Error opening database connection")
+	}
+
+	defer pool.Close()
+
+	ctx := context.Background()
+
+	// var supplier Supplier
+
+	query := "DELETE FROM supplier WHERE id = $1 RETURNING id"
+
+	res, err := pool.ExecContext(ctx, query, id)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := res.RowsAffected()
+	if err == nil {
+		if rows != 1 {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{
+				"No Supplier with this ID Exists": err,
+			})
+			return
+		}
+
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"Message": "Supplier successfully removed!",
+	})
+}
+
+// update supplier email by id
+func UpdateSupplierEmail(c *gin.Context) {
+	var body struct {
+		ID           int64  `json:"id"`
+		ContactEmail string `json:"contact_email"`
+	}
+
+	// if error with fields
+
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error Binding JSON Data": err,
+		})
+		return
+	}
+
+	supplier := Supplier{ID: body.ID, ContactEmail: body.ContactEmail}
+
+	//open database connection
+	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("Error opening database connection")
+	}
+
+	defer pool.Close()
+
+	ctx := context.Background()
+
+	query := "UPDATE supplier SET contact_email = $1 WHERE id = $2"
+
+	_, err = pool.ExecContext(ctx, query, supplier.ContactEmail, supplier.ID)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{
+			"Error updating supplier email address": err,
+		})
+		log.Print("Error updating supplier email address", err)
+		return
+
+	} else {
+		fmt.Println("Updating Supplier Email Address into database...")
+
+		// Respond with product information
+		c.IndentedJSON(http.StatusOK, gin.H{
+			"message":           "Supplier Email Updated Successfully",
+			"New Email Address": supplier.ContactEmail,
+		})
+	}
+
+}
+
+// update supplier phone number by id
+func UpdateSupplierPhone(c *gin.Context) {
+	var body struct {
+		ID    int64  `json:"id"`
+		Phone string `json:"phone"`
+	}
+
+	// if error with fields
+
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error Binding JSON Data": err,
+		})
+		return
+	}
+
+	supplier := Supplier{ID: body.ID, Phone: body.Phone}
+
+	//open database connection
+	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("Error opening database connection")
+	}
+
+	defer pool.Close()
+
+	ctx := context.Background()
+
+	query := "UPDATE supplier SET phone = $1 WHERE id = $2"
+
+	_, err = pool.ExecContext(ctx, query, supplier.Phone, supplier.ID)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{
+			"Error updating supplier phone number": err,
+		})
+		log.Print("Error updating supplier phone number", err)
+		return
+
+	} else {
+		fmt.Println("Updating Supplier Phone Number into database...")
+
+		// Respond with product information
+		c.IndentedJSON(http.StatusOK, gin.H{
+			"message":          "Supplier Phone Number Updated Successfully",
+			"New Phone Number": supplier.Phone,
+		})
+	}
 
 }
