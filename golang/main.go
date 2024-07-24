@@ -33,7 +33,7 @@ func main() {
 	r.POST("/products/insert", controllers.InsertProducts) //rework /insert
 
 	//supplier handlers
-	r.POST("/suppliers/insert")
+	r.POST("/suppliers/insert", controllers.InsertSupplier)
 
 	r.Run() //running on port in env due to fresh
 }

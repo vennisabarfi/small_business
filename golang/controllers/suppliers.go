@@ -18,12 +18,29 @@ type Supplier struct {
 	Name         string `json:"name"`
 	ContactEmail string `json:"contact_email"`
 	Phone        string `json:"phone"`
-	Location     string `json:"location"`
 }
 
 var pool *sql.DB
 
 func InsertSupplier(c *gin.Context) {
+
+	var body struct {
+		Name         string `json:"name"`
+		ContactEmail string `json:"contact_email"`
+		Phone        string `json:"phone"`
+	}
+
+	// if error with fields
+
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error Binding JSON Data": err,
+		})
+		return
+	}
+
+	supplier := Supplier{Name: body.Name, ContactEmail: body.ContactEmail, Phone: body.Phone}
+
 	//open database connection
 	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -33,28 +50,28 @@ func InsertSupplier(c *gin.Context) {
 	defer pool.Close()
 
 	ctx := context.Background()
-	var supplier Supplier
 
-	query := "INSERT INTO suppliers (id, name, contact_email, phone, location) VALUES($1, $2, $3, $4, $5)"
+	query := "INSERT INTO supplier (name, contact_email, phone) VALUES($1, $2, $3)"
 
-	_, err = pool.ExecContext(ctx, query, supplier.ID, supplier.Name, supplier.ContactEmail, supplier.Phone, supplier.Location)
+	_, err = pool.ExecContext(ctx, query, supplier.Name, supplier.ContactEmail, supplier.Phone)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{
 			"Error inserting new supplier": err,
 		})
+		log.Print("Error inserting new supplier", err)
 		return
 
 	} else {
-		fmt.Println("Inserting supplier into database")
+		fmt.Println("Inserting supplier information into database...")
 
-		// Respond with supplier information
+		// Respond with product information
 		c.IndentedJSON(http.StatusOK, gin.H{
-			"message":             "Supplier Successfully Added",
+			"message":             "Supplier Information Successfully Added",
 			"Product Information": supplier,
 		})
-		c.String(http.StatusOK, "Supplier successfully Added")
 	}
+
 }
 
 func ViewSuppliers(c *gin.Context) {
