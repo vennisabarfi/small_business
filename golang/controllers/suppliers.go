@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -118,6 +119,55 @@ func ViewSuppliers(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"Suppliers Found": suppliers,
+	})
+
+}
+
+func ViewSuppliersById(c *gin.Context) {
+
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid supplier ID",
+		})
+		return
+	}
+
+	//open database connection
+	pool, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("Error opening database connection")
+	}
+
+	defer pool.Close()
+
+	ctx := context.Background()
+
+	var supplier Supplier
+
+	query := "SELECT id, name, contact_email, phone FROM supplier WHERE id = $1"
+
+	row := pool.QueryRowContext(ctx, query, id)
+
+	// map onto database
+	err = row.Scan(&supplier.ID, &supplier.Name, &supplier.ContactEmail, &supplier.Phone)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.IndentedJSON(http.StatusNotFound, gin.H{
+				"message": "No supplier found with this ID",
+			})
+		} else {
+			log.Printf("Error scanning row: %v", err)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"error": "Error retrieving supplier",
+			})
+		}
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"Product Found": supplier,
 	})
 
 }

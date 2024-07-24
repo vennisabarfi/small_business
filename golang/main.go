@@ -34,6 +34,7 @@ func main() {
 
 	//supplier handlers
 	r.GET("/suppliers", controllers.ViewSuppliers)
+	r.GET("/suppliers/:id", controllers.ViewSuppliersById)
 	r.POST("/suppliers/insert", controllers.InsertSupplier)
 
 	r.Run() //running on port in env due to fresh
