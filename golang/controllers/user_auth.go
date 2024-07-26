@@ -7,14 +7,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	_ "github.com/lib/pq" //avoid import postgres error with sql
 	"golang.org/x/crypto/bcrypt"
 )
 
-//create user struct
-
+// create user struct
 type User struct {
 	ID       int64  `json:"id"`
 	Email    string `json:"email"`
@@ -109,6 +110,7 @@ func LoginUser(c *gin.Context) {
 	// Get user from database
 	var storedEmail, storedHashedPassword string
 	row := pool.QueryRowContext(ctx, "SELECT email, password FROM users WHERE email=$1", body.Email)
+
 	err = row.Scan(&storedEmail, &storedHashedPassword)
 
 	// if email and password not found
@@ -134,9 +136,30 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
+	// jwt authentication (refreshes every 30 days)
+	var user User
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Failed to create token",
+		})
+
+		return
+	}
+
+	// set cookie
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600*24*30, "", "", false, true)
+
 	// Successfully authenticated
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
-		"email":   storedEmail,
+		"token":   tokenString,
 	})
 }

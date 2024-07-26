@@ -1,2 +1,0 @@
-# small_business/controllers
-controllers\products.go:315:46: body.Price undefined (type struct{ID int64 "json:\"id\""; Stock int "json:\"stock\""} has no field or method Price)
