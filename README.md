@@ -32,7 +32,7 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [Done] Create `Product` model and migration.
 - [Done] Add validations for product fields.
 - [Doing...] Write tests for product management endpoints.
-- [Doing...] Implement search, sorting, and filtering features for products.
+- [Done] Implement search, sorting, and filtering features for products.
 
 ### Day 7: Supplier Management
 - [Done] Implement endpoints for creating (`/api/suppliers`), retrieving (`/api/suppliers`), updating (`/api/suppliers/{id}`), and deleting suppliers (`/api/suppliers/{id}`).
@@ -40,7 +40,7 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [Doing...] Write tests for supplier management endpoints.
 
 ### Day 8: Stock Management
-- [ ] Implement endpoint for updating stock levels (`/api/stock`).
+- [Done] Implement endpoint for updating stock levels (`/api/stock`).
 - [ ] Create `Stock` model and migration.
 - [ ] Write tests for stock management endpoints.
 
