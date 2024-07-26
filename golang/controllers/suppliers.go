@@ -56,7 +56,7 @@ func InsertSupplier(c *gin.Context) {
 
 	ctx := context.Background()
 
-	query := "INSERT INTO supplier (name, contact_email, phone) VALUES($1, $2, $3) Returning ID "
+	query := "INSERT INTO supplier (name, contact_email, phone) VALUES($1, $2, $3) Returning ID"
 
 	err = pool.QueryRowContext(ctx, query, supplier.Name, supplier.ContactEmail, supplier.Phone).Scan(&supplier.ID) //due to auto increment
 
@@ -72,8 +72,8 @@ func InsertSupplier(c *gin.Context) {
 
 		// Respond with product information
 		c.IndentedJSON(http.StatusOK, gin.H{
-			"message":             "Supplier Information Successfully Added",
-			"Product Information": supplier,
+			"message":              "Supplier Information Successfully Added",
+			"Supplier Information": supplier,
 		})
 	}
 
@@ -198,24 +198,39 @@ func DeleteSupplierByID(c *gin.Context) {
 
 	query := "DELETE FROM supplier WHERE id = $1 RETURNING id"
 
-	res, err := pool.ExecContext(ctx, query, id)
+	result, err := pool.ExecContext(ctx, query, id)
 
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error removing supplier": err.Error(),
+		})
+		log.Print("Error removing supplier", err)
+		return
 	}
-	rows, err := res.RowsAffected()
-	if err == nil {
-		if rows != 1 {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{
-				"No Supplier with this ID Exists": err,
-			})
-			return
-		}
 
+	rows, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"Error getting affected rows": err.Error(),
+		})
+		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{
-		"Message": "Supplier successfully removed!",
+
+	if rows != 1 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Supplier not found",
+		})
+		return
+	}
+
+	fmt.Println("Removing supplier from database...")
+
+	// Respond with product information
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "Supplier Removed Successfully",
+		"Supplier ID": id,
 	})
+
 }
 
 // update supplier email by id
@@ -248,25 +263,38 @@ func UpdateSupplierEmail(c *gin.Context) {
 
 	query := "UPDATE supplier SET contact_email = $1 WHERE id = $2"
 
-	_, err = pool.ExecContext(ctx, query, supplier.ContactEmail, supplier.ID)
+	result, err := pool.ExecContext(ctx, query, supplier.ContactEmail, supplier.ID)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{
-			"Error updating supplier email address": err,
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error updating supplier email": err.Error(),
 		})
-		log.Print("Error updating supplier email address", err)
+		log.Print("Error updating supplier email", err)
 		return
-
-	} else {
-		fmt.Println("Updating Supplier Email Address into database...")
-
-		// Respond with product information
-		c.IndentedJSON(http.StatusOK, gin.H{
-			"message":           "Supplier Email Updated Successfully",
-			"New Email Address": supplier.ContactEmail,
-		})
 	}
 
+	rows, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"Error getting affected rows": err.Error(),
+		})
+		return
+	}
+
+	if rows != 1 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Supplier not found",
+		})
+		return
+	}
+
+	fmt.Println("Updating Supplier Email in database...")
+
+	// Respond with product information
+	c.JSON(http.StatusOK, gin.H{
+		"message":           "Supplier Contact Email Updated Successfully",
+		"New Contact Email": supplier.ContactEmail,
+	})
 }
 
 // update supplier phone number by id
@@ -299,23 +327,36 @@ func UpdateSupplierPhone(c *gin.Context) {
 
 	query := "UPDATE supplier SET phone = $1 WHERE id = $2"
 
-	_, err = pool.ExecContext(ctx, query, supplier.Phone, supplier.ID)
+	result, err := pool.ExecContext(ctx, query, supplier.Phone, supplier.ID)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{
-			"Error updating supplier phone number": err,
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error updating phone number": err.Error(),
 		})
-		log.Print("Error updating supplier phone number", err)
+		log.Print("Error updating phone number", err)
 		return
-
-	} else {
-		fmt.Println("Updating Supplier Phone Number into database...")
-
-		// Respond with product information
-		c.IndentedJSON(http.StatusOK, gin.H{
-			"message":          "Supplier Phone Number Updated Successfully",
-			"New Phone Number": supplier.Phone,
-		})
 	}
 
+	rows, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"Error getting affected rows": err.Error(),
+		})
+		return
+	}
+
+	if rows != 1 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Supplier not found",
+		})
+		return
+	}
+
+	fmt.Println("Updating Supplier Phone Number in database...")
+
+	// Respond with product information
+	c.JSON(http.StatusOK, gin.H{
+		"message":          "Supplier Phone Number Updated Successfully",
+		"New Phone Number": supplier.Phone,
+	})
 }

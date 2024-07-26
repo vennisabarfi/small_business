@@ -31,6 +31,7 @@ func main() {
 	r.GET("/products/:id", controllers.ViewProductsById)
 	r.GET("/products", controllers.ViewProducts)
 	r.POST("/products/insert", controllers.InsertProduct)
+	r.PUT("/products/change-price", controllers.UpdateProductPrice)
 	r.DELETE("/products/remove/:id", controllers.DeleteProductByID)
 
 	//supplier handlers
