@@ -30,7 +30,8 @@ func main() {
 	//product handlers
 	r.GET("/products/:id", controllers.ViewProductsById)
 	r.GET("/products", controllers.ViewProducts)
-	r.POST("/products/insert", controllers.InsertProducts) //rework /insert
+	r.POST("/products/insert", controllers.InsertProduct)
+	r.DELETE("/products/remove/:id", controllers.DeleteProductByID)
 
 	//supplier handlers
 	r.GET("/suppliers", controllers.ViewSuppliers)

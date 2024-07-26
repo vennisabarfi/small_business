@@ -19,11 +19,13 @@ type Supplier struct {
 	Name         string `json:"name"`
 	ContactEmail string `json:"contact_email"`
 	Phone        string `json:"phone"`
-	Createdat    string `json: created_at`
-	Deletedat    string `json: deleted_at`
+	CreatedAt    string `json: created_at`
+	DeletedAt    string `json: deleted_at`
 }
 
 var pool *sql.DB
+
+// fix insert issue by using a transaction to verify supplier id first from the supplier table and then use that instead for the insert.
 
 func InsertSupplier(c *gin.Context) {
 
@@ -54,9 +56,9 @@ func InsertSupplier(c *gin.Context) {
 
 	ctx := context.Background()
 
-	query := "INSERT INTO supplier (name, contact_email, phone) VALUES($1, $2, $3)"
+	query := "INSERT INTO supplier (name, contact_email, phone) VALUES($1, $2, $3) Returning ID "
 
-	_, err = pool.ExecContext(ctx, query, supplier.Name, supplier.ContactEmail, supplier.Phone)
+	err = pool.QueryRowContext(ctx, query, supplier.Name, supplier.ContactEmail, supplier.Phone).Scan(&supplier.ID) //due to auto increment
 
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{
@@ -103,7 +105,7 @@ func ViewSuppliers(c *gin.Context) {
 	// Loop through rows and map onto databases
 	for rows.Next() {
 		var supplier Supplier
-		if err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.ContactEmail, &supplier.Phone, &supplier.Createdat, &supplier.Deletedat); err != nil {
+		if err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.ContactEmail, &supplier.Phone, &supplier.CreatedAt, &supplier.DeletedAt); err != nil {
 			c.IndentedJSON(http.StatusBadRequest, gin.H{
 				"Error retrieving suppliers": err,
 			})
