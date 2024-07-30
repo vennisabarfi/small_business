@@ -23,7 +23,7 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [Done] Implement user registration endpoint (`/api/register`).
 - [Doing] Implement user login endpoint (`/api/login`).
 - [Done] Add JWT token generation for authentication.
-- [Doing...] Implement middleware for JWT validation.
+- [Done] Implement middleware for JWT validation.
 - [Done] Create a `User` model and migration.
 - [Done] Write tests for user authentication endpoints.
 
@@ -31,26 +31,26 @@ This project is a comprehensive Inventory Management System built with Go for th
 - [Done] Implement endpoints for creating (`/api/products/create`), retrieving (`/api/viewproducts`), updating (`/api/products/update/{id}`), and deleting products (`/api/products/delete/{id}`).
 - [Done] Create `Product` model and migration.
 - [Done] Add validations for product fields.
-- [Doing...] Write tests for product management endpoints.
+- [Done] Write tests for product management endpoints.
 - [Done] Implement search, sorting, and filtering features for products.
 
 ### Day 7: Supplier Management
 - [Done] Implement endpoints for creating (`/api/suppliers`), retrieving (`/api/suppliers`), updating (`/api/suppliers/{id}`), and deleting suppliers (`/api/suppliers/{id}`).
 - [Done] Create `Supplier` model and migration.
-- [Doing...] Write tests for supplier management endpoints.
+- [Done] Write tests for supplier management endpoints.
 
 ### Day 8: Stock Management
 - [Done] Implement endpoint for updating stock levels (`/api/stock`).
-- [ ] Create `Stock` model and migration.
-- [ ] Write tests for stock management endpoints.
+- [Doing...] Create `Stock` model and migration.
+- [Doing...] Write tests for stock management endpoints.
 
 ### Day 9: Sales Order Management
-- [ ] Implement endpoints for creating (`/api/orders`), retrieving (`/api/orders`), updating (`/api/orders/{id}`), and deleting sales orders (`/api/orders/{id}`).
-- [ ] Create `Order` model and migration.
-- [ ] Write tests for sales order management endpoints.
+- [Doing...] Implement endpoints for creating (`/api/orders`), retrieving (`/api/orders`), updating (`/api/orders/{id}`), and deleting sales orders (`/api/orders/{id}`).
+- [Doing...] Create `Order` model and migration.
+- [Doing...] Write tests for sales order management endpoints.
 
 ### Day 10: Advanced Analytics Setup
-- [ ] Set up Python environment and integrate it with the Go backend.
+- [Doing...] Set up Python environment and integrate it with the Go backend.
 - [ ] Create a basic analytics service using Python.
 - [ ] Implement a script to fetch data from PostgreSQL and perform basic analysis.
 
